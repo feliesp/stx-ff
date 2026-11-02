@@ -8,19 +8,28 @@ export type FlagsState = {
   lastCreatedKey: string | null;
   // Client-side text filter on key or name.
   filter: string;
+  // One step of interaction history: how to undo the last toggle.
+  undo: { key: string; enabled: boolean } | null;
+  // A message for the toast, e.g. why an Undo didn't happen.
+  notice: string | null;
 };
 
 export type FlagsAction =
   | { type: "flag_created"; flag: Flag }
   // The server's latest version of a flag (after a save, or from a 409 conflict).
   | { type: "flag_saved"; flag: Flag }
+  // A successful toggle: saved like any change, and remembered for Undo.
+  | { type: "flag_toggled"; flag: Flag }
+  | { type: "undo_cleared" }
+  | { type: "notice_shown"; notice: string }
+  | { type: "notice_dismissed" }
   | { type: "flag_deleted"; key: string }
   | { type: "filter_changed"; filter: string };
 
 const byKey = (a: Flag, b: Flag) => a.key.localeCompare(b.key);
 
 export function initFlagsState(flags: Flag[]): FlagsState {
-  return { flags: [...flags].sort(byKey), lastCreatedKey: null, filter: "" };
+  return { flags: [...flags].sort(byKey), lastCreatedKey: null, filter: "", undo: null, notice: null };
 }
 
 export function flagsReducer(state: FlagsState, action: FlagsAction): FlagsState {
@@ -40,8 +49,24 @@ export function flagsReducer(state: FlagsState, action: FlagsAction): FlagsState
           f.key === action.flag.key && action.flag.version >= f.version ? action.flag : f,
         ),
       };
+    case "flag_toggled":
+      return {
+        ...flagsReducer(state, { type: "flag_saved", flag: action.flag }),
+        undo: { key: action.flag.key, enabled: !action.flag.enabled },
+        notice: null,
+      };
+    case "undo_cleared":
+      return { ...state, undo: null };
+    case "notice_shown":
+      return { ...state, undo: null, notice: action.notice };
+    case "notice_dismissed":
+      return { ...state, notice: null };
     case "flag_deleted":
-      return { ...state, flags: state.flags.filter((f) => f.key !== action.key) };
+      return {
+        ...state,
+        flags: state.flags.filter((f) => f.key !== action.key),
+        undo: state.undo?.key === action.key ? null : state.undo,
+      };
     case "filter_changed":
       return { ...state, filter: action.filter };
   }

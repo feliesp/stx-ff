@@ -79,3 +79,26 @@ test("creating a flag clears the filter, so the new flag is visible", () => {
 
   expect(visibleFlags(next).map((f) => f.key)).toEqual(["new-checkout"]);
 });
+
+test("a toggle saves the flag and remembers how to undo it", () => {
+  const state = initFlagsState([makeFlag({ enabled: false, version: 1 })]);
+
+  const next = flagsReducer(state, {
+    type: "flag_toggled",
+    flag: makeFlag({ enabled: true, version: 2 }),
+  });
+
+  expect(next.flags[0].enabled).toBe(true);
+  expect(next.undo).toEqual({ key: "new-checkout", enabled: false });
+});
+
+test("deleting the toggled flag forgets its undo", () => {
+  const toggled = flagsReducer(initFlagsState([makeFlag()]), {
+    type: "flag_toggled",
+    flag: makeFlag({ enabled: true, version: 2 }),
+  });
+
+  const next = flagsReducer(toggled, { type: "flag_deleted", key: "new-checkout" });
+
+  expect(next.undo).toBeNull();
+});

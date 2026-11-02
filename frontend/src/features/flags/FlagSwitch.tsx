@@ -28,7 +28,7 @@ export function FlagSwitch({ flag, onProblem }: Props) {
       try {
         const saved = await updateFlag(flag.key, { version: flag.version, enabled });
         // State updates after an `await` must be wrapped in a transition again.
-        startTransition(() => dispatch({ type: "flag_saved", flag: saved }));
+        startTransition(() => dispatch({ type: "flag_toggled", flag: saved }));
       } catch (error) {
         const current = conflictingFlag(error);
         if (current) {

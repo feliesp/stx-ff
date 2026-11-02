@@ -323,3 +323,26 @@ button {
   border: 1px solid #d1d9e0;
   border-radius: 6px;
 }
+
+/* Undo toast */
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  background: #1f2328;
+  color: #fff;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.2);
+}
+
+.toast__action {
+  border: 0;
+  background: none;
+  color: #8cc8ff;
+  font-weight: 600;
+}

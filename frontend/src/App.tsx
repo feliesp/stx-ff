@@ -6,6 +6,7 @@ import { CreateFlagForm } from "./features/flags/CreateFlagForm";
 import { FlagList } from "./features/flags/FlagList";
 import { FlagsProvider } from "./features/flags/FlagsProvider";
 import { LoadError } from "./features/flags/LoadError";
+import { UndoToast } from "./features/flags/UndoToast";
 
 type Props = { initialFlagsPromise: Promise<Flag[]> };
 
@@ -21,6 +22,7 @@ export default function App({ initialFlagsPromise }: Props) {
           <FlagsProvider flagsPromise={flagsPromise}>
             <CreateFlagForm />
             <FlagList />
+            <UndoToast />
           </FlagsProvider>
         </Suspense>
       </ErrorBoundary>
