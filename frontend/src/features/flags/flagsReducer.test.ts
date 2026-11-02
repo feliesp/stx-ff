@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { makeFlag } from "../../test/factories";
-import { flagsReducer, initFlagsState } from "./flagsReducer";
+import { flagsReducer, initFlagsState, visibleFlags } from "./flagsReducer";
 
 const keys = (state: ReturnType<typeof initFlagsState>) => state.flags.map((f) => f.key);
 
@@ -57,4 +57,25 @@ test("a deleted flag is removed from the list", () => {
   const next = flagsReducer(state, { type: "flag_deleted", key: "alpha" });
 
   expect(keys(next)).toEqual(["zeta"]);
+});
+
+test("visibleFlags matches the filter against key or name, ignoring case", () => {
+  let state = initFlagsState([
+    makeFlag({ key: "dark-mode", name: "Dark mode" }),
+    makeFlag({ key: "new-checkout", name: "Checkout redesign" }),
+  ]);
+
+  state = flagsReducer(state, { type: "filter_changed", filter: "CHECKOUT" });
+  expect(visibleFlags(state).map((f) => f.key)).toEqual(["new-checkout"]);
+
+  state = flagsReducer(state, { type: "filter_changed", filter: "mode" });
+  expect(visibleFlags(state).map((f) => f.key)).toEqual(["dark-mode"]);
+});
+
+test("creating a flag clears the filter, so the new flag is visible", () => {
+  const filtered = flagsReducer(initFlagsState([]), { type: "filter_changed", filter: "dark" });
+
+  const next = flagsReducer(filtered, { type: "flag_created", flag: makeFlag() });
+
+  expect(visibleFlags(next).map((f) => f.key)).toEqual(["new-checkout"]);
 });
