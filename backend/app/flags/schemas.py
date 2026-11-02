@@ -26,21 +26,31 @@ def valid_key(value: str) -> str:
 FlagKey = Annotated[str, AfterValidator(valid_key)]
 
 
+FlagName = Annotated[str, StringConstraints(min_length=1, max_length=100)]
+FlagDescription = Annotated[str, StringConstraints(max_length=500)]
+
+
 class FlagCreate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     key: FlagKey
-    name: Annotated[str, StringConstraints(min_length=1, max_length=100)]
-    description: Annotated[str, StringConstraints(max_length=500)] = ""
+    name: FlagName
+    description: FlagDescription = ""
 
 
 class FlagUpdate(BaseModel):
-    """A partial update. ``version`` is the version the client's change is based on."""
+    """A partial update. ``version`` is the version the client's change is based on.
 
-    model_config = ConfigDict(extra="forbid")
+    The key is deliberately absent (and extra fields are rejected): code refers
+    to flags by key, so it can never change.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     version: Annotated[int, Field(ge=1)]
     enabled: bool | None = None
+    name: FlagName | None = None
+    description: FlagDescription | None = None
 
 
 class FlagOut(BaseModel):

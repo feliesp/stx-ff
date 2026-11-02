@@ -61,7 +61,7 @@ async def update_flag(session: AsyncSession, key: str, data: FlagUpdate) -> Flag
     if flag.version != data.version:
         raise _conflict(flag)
 
-    requested = data.model_dump(exclude_unset=True, exclude={"version"})
+    requested = data.model_dump(exclude_unset=True, exclude_none=True, exclude={"version"})
     changes = {
         field: [getattr(flag, field), value]
         for field, value in requested.items()
@@ -70,16 +70,21 @@ async def update_flag(session: AsyncSession, key: str, data: FlagUpdate) -> Flag
     if not changes:
         return flag  # nothing to change: no new version, no event
 
-    result = await session.execute(
-        update(Flag)
-        .where(Flag.id == flag.id, Flag.version == data.version)
-        .values(
-            **{field: new for field, (_old, new) in changes.items()},
-            version=Flag.version + 1,
-            updated_at=utc_now(),
+    try:
+        result = await session.execute(
+            update(Flag)
+            .where(Flag.id == flag.id, Flag.version == data.version)
+            .values(
+                **{field: new for field, (_old, new) in changes.items()},
+                version=Flag.version + 1,
+                updated_at=utc_now(),
+            )
+            .execution_options(synchronize_session=False)
         )
-        .execution_options(synchronize_session=False)
-    )
+    except IntegrityError:
+        # The only unique field an update can touch is the name.
+        await session.rollback()
+        raise FlagNameTaken(changes["name"][1]) from None
     if result.rowcount == 0:
         # Someone else wrote between our read and our write.
         await session.rollback()
