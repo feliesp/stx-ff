@@ -19,6 +19,8 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from starlette.exceptions import HTTPException
 
+from app.context import request_id_var
+
 PROBLEM_MEDIA_TYPE = "application/problem+json"
 
 
@@ -30,6 +32,7 @@ class Problem(BaseModel):
     status: int
     detail: str | None = None
     errors: dict[str, list[str]] | None = None
+    request_id: str | None = None
 
 
 class ProblemError(Exception):
@@ -64,6 +67,7 @@ def problem_response(
     if errors:
         body["errors"] = errors
     body.update(extra or {})
+    body["request_id"] = request_id_var.get()
     return JSONResponse(status_code=status, content=body, media_type=PROBLEM_MEDIA_TYPE)
 
 

@@ -15,11 +15,13 @@ from app import health
 from app.config import Settings
 from app.db import create_database
 from app.flags.router import router as flags_router
+from app.observability import configure_logging, install_request_context
 from app.problems import register_problem_handlers
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or Settings()
+    configure_logging(settings.log_level)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -32,6 +34,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     app = FastAPI(title="Feature Flag Manager", version="0.1.0", lifespan=lifespan)
     register_problem_handlers(app)
+    install_request_context(app)
     app.include_router(health.router, prefix="/api/v1")
     app.include_router(flags_router, prefix="/api/v1")
     return app
