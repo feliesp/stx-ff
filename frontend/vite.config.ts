@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     // The browser only talks to the Vite origin; /api is forwarded to FastAPI.
     // Same-origin means no CORS setup, and JS can read X-Request-ID.
-    proxy: { "/api": "http://localhost:8000" },
+    proxy: { "/api": process.env.API_URL ?? "http://localhost:8000" },
   },
   test: {
     environment: "jsdom",
