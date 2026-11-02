@@ -1,6 +1,6 @@
 // Thin typed wrapper around fetch for the flags API. Every non-2xx response
 // becomes an ApiError carrying the server's Problem Details body.
-import type { Flag, Problem } from "./types";
+import type { Change, Flag, Problem } from "./types";
 
 const BASE = "/api/v1";
 
@@ -77,4 +77,8 @@ export type NewFlag = { key: string; name: string; description: string };
 
 export function createFlag(flag: NewFlag): Promise<Flag> {
   return request<Flag>("/flags", { method: "POST", body: JSON.stringify(flag) });
+}
+
+export function fetchHistory(key: string): Promise<Change[]> {
+  return request<Change[]>(`/flags/${encodeURIComponent(key)}/history`);
 }

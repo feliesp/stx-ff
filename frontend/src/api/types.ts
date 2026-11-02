@@ -19,3 +19,12 @@ export type Problem = {
   request_id?: string | null;
   current?: Flag;
 };
+
+// One entry in a flag's History: what changed from what to what.
+export type Change = {
+  version: number;
+  action: "created" | "updated";
+  changes: Record<string, [unknown, unknown]>;
+  request_id: string | null;
+  created_at: string;
+};

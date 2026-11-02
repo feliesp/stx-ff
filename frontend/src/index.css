@@ -242,3 +242,33 @@ button {
     background: transparent;
   }
 }
+
+.button--small {
+  padding: 0.2rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+.history {
+  margin: 0.75rem 0 0;
+  padding: 0.5rem 0.75rem;
+  list-style: none;
+  background: #f6f8fa;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.history__entry {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.2rem 0;
+}
+
+.history__version {
+  font-family: ui-monospace, monospace;
+  color: #59636e;
+}
+
+.history__time {
+  margin-left: auto;
+  color: #59636e;
+}
