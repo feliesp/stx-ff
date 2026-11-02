@@ -20,3 +20,83 @@ body {
   margin: 0 auto;
   padding: 2rem 1rem;
 }
+
+h1 {
+  margin: 0 0 1.5rem;
+  font-size: 1.75rem;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid #0969da;
+  outline-offset: 2px;
+}
+
+.loading,
+.empty {
+  color: #59636e;
+}
+
+.notice {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.notice--error {
+  background: #ffebe9;
+  border: 1px solid #ff818266;
+  color: #82071e;
+}
+
+.notice p {
+  margin: 0 0 0.5rem;
+}
+
+.flag-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #d1d9e0;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.flag {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+}
+
+.flag + .flag {
+  border-top: 1px solid #d1d9e0;
+}
+
+.flag__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.flag__name {
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+.flag__key {
+  font-size: 0.85rem;
+  color: #59636e;
+  background: #eff2f5;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+
+.flag__description {
+  margin: 0.25rem 0 0;
+  color: #59636e;
+  font-size: 0.9rem;
+}
