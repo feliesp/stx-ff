@@ -1,0 +1,10 @@
+"""Application settings, read from environment variables (prefix ``FLAGS_``)."""
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="FLAGS_", env_file=".env")
+
+    database_url: str = "sqlite+aiosqlite:///./flags.sqlite3"
+    log_level: str = "INFO"
