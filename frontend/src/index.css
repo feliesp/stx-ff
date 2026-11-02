@@ -67,10 +67,13 @@ button {
 }
 
 .flag {
+  padding: 0.75rem 1rem;
+}
+
+.flag__main {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 0.75rem 1rem;
 }
 
 .flag + .flag {
@@ -98,5 +101,59 @@ button {
 .flag__description {
   margin: 0.25rem 0 0;
   color: #59636e;
+  font-size: 0.9rem;
+}
+
+.flag__problem {
+  margin: 0.5rem 0 0;
+  color: #82071e;
+  font-size: 0.9rem;
+}
+
+/* Switch: a real <button role="switch">, styled as a track + thumb. */
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem;
+  border: 0;
+  background: none;
+  color: inherit;
+}
+
+.switch:disabled {
+  cursor: progress;
+}
+
+.switch__track {
+  position: relative;
+  width: 2.5rem;
+  height: 1.4rem;
+  border-radius: 999px;
+  background: #afb8c1;
+  transition: background 0.15s;
+}
+
+.switch__thumb {
+  position: absolute;
+  top: 0.15rem;
+  left: 0.15rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.15s;
+}
+
+.switch[aria-checked="true"] .switch__track {
+  background: #1f883d;
+}
+
+.switch[aria-checked="true"] .switch__thumb {
+  transform: translateX(1.1rem);
+}
+
+.switch__label {
+  min-width: 4.5rem;
   font-size: 0.9rem;
 }

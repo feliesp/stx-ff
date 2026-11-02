@@ -49,3 +49,26 @@ async function readProblem(response: Response): Promise<Problem> {
 export function fetchFlags(): Promise<Flag[]> {
   return request<Flag[]>("/flags");
 }
+
+export type FlagChanges = { version: number; enabled?: boolean };
+
+/** Partial update; `version` is the version the change is based on. */
+export function updateFlag(key: string, changes: FlagChanges): Promise<Flag> {
+  return request<Flag>(`/flags/${encodeURIComponent(key)}`, {
+    method: "PATCH",
+    body: JSON.stringify(changes),
+  });
+}
+
+/** The flag's current state, if the error is an optimistic-concurrency conflict. */
+export function conflictingFlag(error: unknown): Flag | undefined {
+  return error instanceof ApiError && error.problem.type === "version_conflict"
+    ? error.problem.current
+    : undefined;
+}
+
+/** A user-facing sentence for an unexpected API failure. */
+export function describeFailure(action: string, error: unknown): string {
+  const reference = error instanceof ApiError ? error.reference : undefined;
+  return reference ? `${action} (ref ${reference})` : action;
+}

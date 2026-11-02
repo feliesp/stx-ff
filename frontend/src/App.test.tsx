@@ -1,18 +1,10 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, test } from "vitest";
-import App from "./App";
-import { fetchFlags } from "./api/client";
 import { makeFlag } from "./test/factories";
+import { renderApp } from "./test/renderApp";
 import { server } from "./test/server";
-
-export async function renderApp() {
-  // use() suspends on the promise; awaiting act lets it resolve inside the test.
-  await act(async () => {
-    render(<App initialFlagsPromise={fetchFlags()} />);
-  });
-}
 
 describe("loading the flag list", () => {
   test("shows each flag's name, key and description", async () => {

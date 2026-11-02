@@ -1,3 +1,4 @@
+import { FlagRow } from "./FlagRow";
 import { useFlags } from "./flagsContext";
 
 export function FlagList() {
@@ -10,13 +11,7 @@ export function FlagList() {
   return (
     <ul className="flag-list">
       {state.flags.map((flag) => (
-        <li key={flag.key} className="flag">
-          <div className="flag__text">
-            <span className="flag__name">{flag.name}</span>
-            <code className="flag__key">{flag.key}</code>
-            {flag.description && <p className="flag__description">{flag.description}</p>}
-          </div>
-        </li>
+        <FlagRow key={flag.key} flag={flag} />
       ))}
     </ul>
   );
