@@ -41,3 +41,12 @@ describe("flagsReducer", () => {
     expect(next.flags[0]).toMatchObject({ enabled: true, version: 3 });
   });
 });
+
+test("remembers the most recently created flag, so it can be highlighted", () => {
+  const next = flagsReducer(initFlagsState([]), {
+    type: "flag_created",
+    flag: makeFlag({ key: "fresh" }),
+  });
+
+  expect(next.lastCreatedKey).toBe("fresh");
+});

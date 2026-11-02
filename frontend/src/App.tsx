@@ -2,6 +2,7 @@ import { Suspense, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { fetchFlags } from "./api/client";
 import type { Flag } from "./api/types";
+import { CreateFlagForm } from "./features/flags/CreateFlagForm";
 import { FlagList } from "./features/flags/FlagList";
 import { FlagsProvider } from "./features/flags/FlagsProvider";
 import { LoadError } from "./features/flags/LoadError";
@@ -18,6 +19,7 @@ export default function App({ initialFlagsPromise }: Props) {
       <ErrorBoundary FallbackComponent={LoadError} onReset={() => setFlagsPromise(fetchFlags())}>
         <Suspense fallback={<p className="loading">Loading flags…</p>}>
           <FlagsProvider flagsPromise={flagsPromise}>
+            <CreateFlagForm />
             <FlagList />
           </FlagsProvider>
         </Suspense>

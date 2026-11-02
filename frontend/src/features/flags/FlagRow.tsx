@@ -2,11 +2,13 @@ import { useState } from "react";
 import type { Flag } from "../../api/types";
 import { FlagSwitch } from "./FlagSwitch";
 
-export function FlagRow({ flag }: { flag: Flag }) {
+type Props = { flag: Flag; isNew: boolean };
+
+export function FlagRow({ flag, isNew }: Props) {
   const [problem, setProblem] = useState<string | null>(null);
 
   return (
-    <li className="flag">
+    <li className={isNew ? "flag flag--new" : "flag"}>
       <div className="flag__main">
         <div className="flag__text">
           <span className="flag__name">{flag.name}</span>

@@ -157,3 +157,88 @@ button {
   min-width: 4.5rem;
   font-size: 0.9rem;
 }
+
+/* Create form */
+.create-form {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border: 1px solid #d1d9e0;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.create-form h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.1rem;
+}
+
+.create-form__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.create-form__failure {
+  color: #82071e;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.field__label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.field input {
+  font: inherit;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #d1d9e0;
+  border-radius: 6px;
+}
+
+.field__hint {
+  font-size: 0.8rem;
+  color: #59636e;
+}
+
+.field__error {
+  font-size: 0.85rem;
+  color: #82071e;
+}
+
+.button {
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
+  border: 1px solid #d1d9e0;
+  background: #f6f8fa;
+}
+
+.button--primary {
+  background: #1f883d;
+  border-color: #1f883d;
+  color: #fff;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+/* A newly created flag fades from highlighted to normal. */
+.flag--new {
+  animation: highlight 2.5s ease-out;
+}
+
+@keyframes highlight {
+  from {
+    background: #fff8c5;
+  }
+  to {
+    background: transparent;
+  }
+}

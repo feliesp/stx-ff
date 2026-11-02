@@ -72,3 +72,9 @@ export function describeFailure(action: string, error: unknown): string {
   const reference = error instanceof ApiError ? error.reference : undefined;
   return reference ? `${action} (ref ${reference})` : action;
 }
+
+export type NewFlag = { key: string; name: string; description: string };
+
+export function createFlag(flag: NewFlag): Promise<Flag> {
+  return request<Flag>("/flags", { method: "POST", body: JSON.stringify(flag) });
+}

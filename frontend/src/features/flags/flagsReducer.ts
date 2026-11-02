@@ -4,6 +4,8 @@ import type { Flag } from "../../api/types";
 
 export type FlagsState = {
   flags: Flag[];
+  // Briefly highlighted in the list so you can see where a new flag landed.
+  lastCreatedKey: string | null;
 };
 
 export type FlagsAction =
@@ -14,7 +16,7 @@ export type FlagsAction =
 const byKey = (a: Flag, b: Flag) => a.key.localeCompare(b.key);
 
 export function initFlagsState(flags: Flag[]): FlagsState {
-  return { flags: [...flags].sort(byKey) };
+  return { flags: [...flags].sort(byKey), lastCreatedKey: null };
 }
 
 export function flagsReducer(state: FlagsState, action: FlagsAction): FlagsState {
@@ -23,6 +25,7 @@ export function flagsReducer(state: FlagsState, action: FlagsAction): FlagsState
       return {
         ...state,
         flags: [...state.flags.filter((f) => f.key !== action.flag.key), action.flag].sort(byKey),
+        lastCreatedKey: action.flag.key,
       };
     case "flag_saved":
       return {

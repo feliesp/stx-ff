@@ -11,7 +11,7 @@ export function FlagList() {
   return (
     <ul className="flag-list">
       {state.flags.map((flag) => (
-        <FlagRow key={flag.key} flag={flag} />
+        <FlagRow key={flag.key} flag={flag} isNew={flag.key === state.lastCreatedKey} />
       ))}
     </ul>
   );
