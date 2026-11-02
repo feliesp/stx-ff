@@ -4,7 +4,7 @@ import re
 from datetime import UTC, datetime
 from typing import Annotated
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, StringConstraints
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, StringConstraints
 
 
 def as_utc(value: datetime) -> datetime:
@@ -32,6 +32,15 @@ class FlagCreate(BaseModel):
     key: FlagKey
     name: Annotated[str, StringConstraints(min_length=1, max_length=100)]
     description: Annotated[str, StringConstraints(max_length=500)] = ""
+
+
+class FlagUpdate(BaseModel):
+    """A partial update. ``version`` is the version the client's change is based on."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    version: Annotated[int, Field(ge=1)]
+    enabled: bool | None = None
 
 
 class FlagOut(BaseModel):

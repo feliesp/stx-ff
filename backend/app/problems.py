@@ -33,6 +33,7 @@ class Problem(BaseModel):
     detail: str | None = None
     errors: dict[str, list[str]] | None = None
     request_id: str | None = None
+    current: dict[str, Any] | None = None
 
 
 class ProblemError(Exception):
