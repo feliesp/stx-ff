@@ -4,7 +4,7 @@ from fastapi import APIRouter, status
 
 from app.db import SessionDep
 from app.flags import service
-from app.flags.schemas import FlagCreate, FlagOut, FlagUpdate
+from app.flags.schemas import ChangeOut, FlagCreate, FlagOut, FlagUpdate
 from app.problems import Problem
 
 router = APIRouter(prefix="/flags", tags=["flags"])
@@ -33,3 +33,9 @@ async def create_flag(data: FlagCreate, session: SessionDep):
 async def update_flag(key: str, data: FlagUpdate, session: SessionDep):
     """Partially update a flag. ``version`` must match the flag's current version."""
     return await service.update_flag(session, key, data)
+
+
+@router.get("/{key}/history", response_model=list[ChangeOut], responses={404: {"model": Problem}})
+async def flag_history(key: str, session: SessionDep):
+    """The flag's Changes, newest first."""
+    return await service.flag_history(session, key)

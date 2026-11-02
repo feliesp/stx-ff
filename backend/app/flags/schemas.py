@@ -2,7 +2,7 @@
 
 import re
 from datetime import UTC, datetime
-from typing import Annotated
+from typing import Annotated, Any, Literal
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, StringConstraints
 
@@ -53,3 +53,13 @@ class FlagOut(BaseModel):
     version: int
     created_at: UtcDatetime
     updated_at: UtcDatetime
+
+
+class ChangeOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    version: int
+    action: Literal["created", "updated"]
+    changes: dict[str, list[Any]]
+    request_id: str | None
+    created_at: UtcDatetime

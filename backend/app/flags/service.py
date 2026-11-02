@@ -10,11 +10,15 @@ from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.context import request_id_var
 from app.flags.errors import FlagKeyTaken, FlagNameTaken, FlagNotFound, VersionConflict
-from app.flags.models import Flag, utc_now
+from app.flags.models import Flag, FlagChange, utc_now
 from app.flags.schemas import FlagCreate, FlagOut, FlagUpdate
 
 logger = logging.getLogger(__name__)
+
+# Fields recorded in a flag's History.
+TRACKED_FIELDS = ("key", "name", "description", "enabled")
 
 
 async def list_flags(session: AsyncSession) -> Sequence[Flag]:
@@ -26,6 +30,9 @@ async def create_flag(session: AsyncSession, data: FlagCreate) -> Flag:
     flag = Flag(key=data.key, name=data.name, description=data.description)
     session.add(flag)
     try:
+        await session.flush()  # assigns flag.id; unique violations surface here
+        changes = {field: [None, getattr(flag, field)] for field in TRACKED_FIELDS}
+        session.add(_record_change(flag, "created", changes))
         await session.commit()
     except IntegrityError:
         # The database's unique constraints are the source of truth, so two
@@ -77,6 +84,9 @@ async def update_flag(session: AsyncSession, key: str, data: FlagUpdate) -> Flag
         # Someone else wrote between our read and our write.
         await session.rollback()
         raise _conflict(await _get_flag(session, key))
+    # Same transaction as the UPDATE: the change and its History entry are
+    # committed together or not at all.
+    session.add(_record_change(flag, "updated", changes, version=data.version + 1))
     await session.commit()
     await session.refresh(flag)
 
@@ -85,6 +95,27 @@ async def update_flag(session: AsyncSession, key: str, data: FlagUpdate) -> Flag
         extra={"flag_key": flag.key, "version": flag.version, "changes": changes},
     )
     return flag
+
+
+async def flag_history(session: AsyncSession, key: str) -> Sequence[FlagChange]:
+    """A flag's Changes, newest first."""
+    flag = await _get_flag(session, key)
+    result = await session.scalars(
+        select(FlagChange).where(FlagChange.flag_id == flag.id).order_by(FlagChange.version.desc())
+    )
+    return result.all()
+
+
+def _record_change(
+    flag: Flag, action: str, changes: dict, *, version: int | None = None
+) -> FlagChange:
+    return FlagChange(
+        flag_id=flag.id,
+        version=version or flag.version,
+        action=action,
+        changes=changes,
+        request_id=request_id_var.get(),
+    )
 
 
 async def _get_flag(session: AsyncSession, key: str) -> Flag:

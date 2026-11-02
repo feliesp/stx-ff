@@ -1,8 +1,9 @@
 """Database model for a Flag (see GLOSSARY.md for the domain vocabulary)."""
 
 from datetime import UTC, datetime
+from typing import Any
 
-from sqlalchemy import Index, String, func
+from sqlalchemy import JSON, ForeignKey, Index, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db import Base
@@ -31,3 +32,20 @@ class Flag(Base):
         # Names are unique regardless of case ("Checkout" vs "checkout").
         Index("uq_flags_name_lower", func.lower(name), unique=True),
     )
+
+
+class FlagChange(Base):
+    """One recorded modification of a Flag. A flag's History is its Changes."""
+
+    __tablename__ = "flag_changes"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    flag_id: Mapped[int] = mapped_column(ForeignKey("flags.id"), index=True)
+    # The flag's version after this change.
+    version: Mapped[int]
+    action: Mapped[str] = mapped_column(String(16))  # "created" | "updated"
+    # {field: [old, new]}; old is None for a creation.
+    changes: Mapped[dict[str, Any]] = mapped_column(JSON)
+    # Links the change to the request's log lines.
+    request_id: Mapped[str | None] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(default=utc_now)
