@@ -50,7 +50,12 @@ export function fetchFlags(): Promise<Flag[]> {
   return request<Flag[]>("/flags");
 }
 
-export type FlagChanges = { version: number; enabled?: boolean };
+export type FlagChanges = {
+  version: number;
+  enabled?: boolean;
+  name?: string;
+  description?: string;
+};
 
 /** Partial update; `version` is the version the change is based on. */
 export function updateFlag(key: string, changes: FlagChanges): Promise<Flag> {

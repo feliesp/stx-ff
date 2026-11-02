@@ -3,6 +3,7 @@
 // pending flag, so there's no hand-written loading/error state.
 import { startTransition, useActionState, useState } from "react";
 import { ApiError, createFlag, describeFailure } from "../../api/client";
+import { Field } from "./Field";
 import { useFlags } from "./flagsContext";
 import { suggestKey } from "./suggestKey";
 
@@ -78,27 +79,5 @@ export function CreateFlagForm() {
         {isPending ? "Creating…" : "Create flag"}
       </button>
     </form>
-  );
-}
-
-type FieldProps = {
-  label: string;
-  hint?: string;
-  errors?: string[];
-  children: React.ReactElement;
-};
-
-function Field({ label, hint, errors, children }: FieldProps) {
-  return (
-    <label className="field">
-      <span className="field__label">{label}</span>
-      {children}
-      {hint && <span className="field__hint">{hint}</span>}
-      {errors?.map((message) => (
-        <span key={message} className="field__error">
-          {message}
-        </span>
-      ))}
-    </label>
   );
 }
