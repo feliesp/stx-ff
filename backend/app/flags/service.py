@@ -22,7 +22,7 @@ TRACKED_FIELDS = ("key", "name", "description", "enabled")
 
 
 async def list_flags(session: AsyncSession) -> Sequence[Flag]:
-    result = await session.scalars(select(Flag).order_by(Flag.key))
+    result = await session.scalars(select(Flag).where(Flag.deleted_at.is_(None)).order_by(Flag.key))
     return result.all()
 
 
@@ -44,9 +44,10 @@ async def create_flag(session: AsyncSession, data: FlagCreate) -> Flag:
 
 
 async def _uniqueness_error(session: AsyncSession, data: FlagCreate) -> Exception:
-    key_taken = await session.scalar(select(Flag.id).where(Flag.key == data.key))
-    if key_taken is not None:
-        return FlagKeyTaken(data.key)
+    # Includes deleted flags: their keys stay reserved forever.
+    holder = (await session.execute(select(Flag.deleted_at).where(Flag.key == data.key))).first()
+    if holder is not None:
+        return FlagKeyTaken(data.key, by_deleted_flag=holder.deleted_at is not None)
     return FlagNameTaken(data.name)
 
 
@@ -71,24 +72,13 @@ async def update_flag(session: AsyncSession, key: str, data: FlagUpdate) -> Flag
         return flag  # nothing to change: no new version, no event
 
     try:
-        result = await session.execute(
-            update(Flag)
-            .where(Flag.id == flag.id, Flag.version == data.version)
-            .values(
-                **{field: new for field, (_old, new) in changes.items()},
-                version=Flag.version + 1,
-                updated_at=utc_now(),
-            )
-            .execution_options(synchronize_session=False)
+        await _versioned_update(
+            session, flag, data.version, {field: new for field, (_old, new) in changes.items()}
         )
     except IntegrityError:
         # The only unique field an update can touch is the name.
         await session.rollback()
         raise FlagNameTaken(changes["name"][1]) from None
-    if result.rowcount == 0:
-        # Someone else wrote between our read and our write.
-        await session.rollback()
-        raise _conflict(await _get_flag(session, key))
     # Same transaction as the UPDATE: the change and its History entry are
     # committed together or not at all.
     session.add(_record_change(flag, "updated", changes, version=data.version + 1))
@@ -100,6 +90,37 @@ async def update_flag(session: AsyncSession, key: str, data: FlagUpdate) -> Flag
         extra={"flag_key": flag.key, "version": flag.version, "changes": changes},
     )
     return flag
+
+
+async def delete_flag(session: AsyncSession, key: str, version: int) -> None:
+    """Soft-delete a flag. Like any change, it must be based on the current version."""
+    flag = await _get_flag(session, key)
+    if flag.version != version:
+        raise _conflict(flag)
+    await _versioned_update(session, flag, version, {"deleted_at": utc_now()})
+    session.add(_record_change(flag, "deleted", {}, version=version + 1))
+    await session.commit()
+    logger.info("flag.deleted", extra={"flag_key": key, "version": version + 1})
+
+
+async def _versioned_update(
+    session: AsyncSession, flag: Flag, expected_version: int, values: dict
+) -> None:
+    """``UPDATE ... WHERE id = ? AND version = ?``: the optimistic concurrency guard.
+
+    Check and write happen in one statement, so two concurrent writers can't
+    both pass the check. Raises a conflict if someone wrote first.
+    """
+    result = await session.execute(
+        update(Flag)
+        .where(Flag.id == flag.id, Flag.version == expected_version)
+        .values(**values, version=Flag.version + 1, updated_at=utc_now())
+        .execution_options(synchronize_session=False)
+    )
+    if result.rowcount == 0:
+        # Someone else wrote between our read and our write.
+        await session.rollback()
+        raise _conflict(await _get_flag(session, flag.key))
 
 
 async def flag_history(session: AsyncSession, key: str) -> Sequence[FlagChange]:
@@ -125,7 +146,9 @@ def _record_change(
 
 async def _get_flag(session: AsyncSession, key: str) -> Flag:
     flag = await session.scalar(
-        select(Flag).where(Flag.key == key).execution_options(populate_existing=True)
+        select(Flag)
+        .where(Flag.key == key, Flag.deleted_at.is_(None))
+        .execution_options(populate_existing=True)
     )
     if flag is None:
         raise FlagNotFound(key)

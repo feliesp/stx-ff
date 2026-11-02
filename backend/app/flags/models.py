@@ -27,10 +27,20 @@ class Flag(Base):
     version: Mapped[int] = mapped_column(default=1)
     created_at: Mapped[datetime] = mapped_column(default=utc_now)
     updated_at: Mapped[datetime] = mapped_column(default=utc_now)
+    # Soft delete: a Deleted flag is hidden everywhere, but its row (and History)
+    # is kept and its key stays reserved by the plain unique constraint above.
+    deleted_at: Mapped[datetime | None] = mapped_column(default=None)
 
     __table_args__ = (
-        # Names are unique regardless of case ("Checkout" vs "checkout").
-        Index("uq_flags_name_lower", func.lower(name), unique=True),
+        # Names are unique regardless of case ("Checkout" vs "checkout"), among
+        # flags that aren't deleted: a deleted flag's name can be used again.
+        Index(
+            "uq_flags_name_lower",
+            func.lower(name),
+            unique=True,
+            sqlite_where=deleted_at.is_(None),
+            postgresql_where=deleted_at.is_(None),
+        ),
     )
 
 
@@ -43,7 +53,7 @@ class FlagChange(Base):
     flag_id: Mapped[int] = mapped_column(ForeignKey("flags.id"), index=True)
     # The flag's version after this change.
     version: Mapped[int]
-    action: Mapped[str] = mapped_column(String(16))  # "created" | "updated"
+    action: Mapped[str] = mapped_column(String(16))  # "created" | "updated" | "deleted"
     # {field: [old, new]}; old is None for a creation.
     changes: Mapped[dict[str, Any]] = mapped_column(JSON)
     # Links the change to the request's log lines.

@@ -7,8 +7,12 @@ from app.problems import ProblemError
 
 
 class FlagKeyTaken(ProblemError):
-    def __init__(self, key: str) -> None:
-        message = f"A flag with key '{key}' already exists."
+    def __init__(self, key: str, *, by_deleted_flag: bool = False) -> None:
+        message = (
+            f"The key '{key}' belonged to a deleted flag and can't be reused."
+            if by_deleted_flag
+            else f"A flag with key '{key}' already exists."
+        )
         super().__init__(409, "flag_key_taken", message, errors={"key": [message]})
 
 

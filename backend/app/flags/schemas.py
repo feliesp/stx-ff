@@ -69,7 +69,7 @@ class ChangeOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     version: int
-    action: Literal["created", "updated"]
+    action: Literal["created", "updated", "deleted"]
     changes: dict[str, list[Any]]
     request_id: str | None
     created_at: UtcDatetime
