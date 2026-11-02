@@ -1,0 +1,3 @@
+# Deferred: environments and live updates
+
+Two real-world features were left out on purpose. **Environments** (dev/staging/prod) would change the model from "a flag is enabled" to "a flag's state *in an environment* is enabled", moving `enabled` and `version` onto a per-environment record; it's the first thing to add. **Live updates** (pushing changes to open browsers via Server-Sent Events) would fix stale screens across users; for now, optimistic concurrency limits the damage to stale *reads*: a stale *write* is always rejected with the current values. A single-process in-memory broadcaster would work for one server; several workers need Redis pub/sub or Postgres `LISTEN/NOTIFY`.

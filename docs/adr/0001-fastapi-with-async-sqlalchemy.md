@@ -1,0 +1,3 @@
+# FastAPI with async SQLAlchemy
+
+The API is FastAPI on SQLAlchemy 2's asyncio extension with the `aiosqlite` driver, with Pydantic schemas kept separate from the ORM models. With a natively async driver, a whole change (the versioned `UPDATE` plus its history row) runs as one real async transaction on the event loop, without the thread-pool bridging that Django's async ORM needs for transactions. We considered SQLModel (one class for table and schema) but kept the two apart: the database row (`id`, `deleted_at`) and the API contract evolve for different reasons. Tables are created with `create_all` at startup; Alembic migrations are the next step once the schema has to evolve with real data.

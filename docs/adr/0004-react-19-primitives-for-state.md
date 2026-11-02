@@ -1,0 +1,3 @@
+# React 19 primitives instead of a server-state library
+
+The UI uses React's own tools: `use()` + Suspense + an error boundary for the initial load, Context + `useReducer` as the single store, `useOptimistic` for instant toggles that roll back on failure, and `useActionState` for forms. With one resource and a handful of operations, the reducer gives one pure, unit-tested place for every state transition (including undo history), and there's less hidden machinery to reason about. TanStack Query is the natural next step if the app grows more screens, shared caches, background refetching or pagination; the reducer would then keep only client state such as filters and undo.
