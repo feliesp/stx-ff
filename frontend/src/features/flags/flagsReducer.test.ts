@@ -50,3 +50,11 @@ test("remembers the most recently created flag, so it can be highlighted", () =>
 
   expect(next.lastCreatedKey).toBe("fresh");
 });
+
+test("a deleted flag is removed from the list", () => {
+  const state = initFlagsState([makeFlag({ key: "alpha" }), makeFlag({ key: "zeta" })]);
+
+  const next = flagsReducer(state, { type: "flag_deleted", key: "alpha" });
+
+  expect(keys(next)).toEqual(["zeta"]);
+});

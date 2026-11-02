@@ -304,3 +304,13 @@ button {
   background: #fff8c5;
   border: 1px solid #d4a72c66;
 }
+
+.button--danger {
+  background: #cf222e;
+  border-color: #cf222e;
+  color: #fff;
+}
+
+.button--danger-text {
+  color: #cf222e;
+}

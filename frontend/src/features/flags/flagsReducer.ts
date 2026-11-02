@@ -11,7 +11,8 @@ export type FlagsState = {
 export type FlagsAction =
   | { type: "flag_created"; flag: Flag }
   // The server's latest version of a flag (after a save, or from a 409 conflict).
-  | { type: "flag_saved"; flag: Flag };
+  | { type: "flag_saved"; flag: Flag }
+  | { type: "flag_deleted"; key: string };
 
 const byKey = (a: Flag, b: Flag) => a.key.localeCompare(b.key);
 
@@ -35,5 +36,7 @@ export function flagsReducer(state: FlagsState, action: FlagsAction): FlagsState
           f.key === action.flag.key && action.flag.version >= f.version ? action.flag : f,
         ),
       };
+    case "flag_deleted":
+      return { ...state, flags: state.flags.filter((f) => f.key !== action.key) };
   }
 }

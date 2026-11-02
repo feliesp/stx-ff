@@ -87,3 +87,10 @@ export function createFlag(flag: NewFlag): Promise<Flag> {
 export function fetchHistory(key: string): Promise<Change[]> {
   return request<Change[]>(`/flags/${encodeURIComponent(key)}/history`);
 }
+
+/** Delete for good; `version` is the version the user saw when confirming. */
+export function deleteFlag(key: string, version: number): Promise<void> {
+  return request<void>(`/flags/${encodeURIComponent(key)}?version=${version}`, {
+    method: "DELETE",
+  });
+}

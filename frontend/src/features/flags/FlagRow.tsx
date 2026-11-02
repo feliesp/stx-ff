@@ -2,6 +2,7 @@ import { startTransition, Suspense, useEffect, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { fetchHistory } from "../../api/client";
 import type { Change, Flag } from "../../api/types";
+import { DeleteFlagDialog } from "./DeleteFlagDialog";
 import { EditFlagDialog } from "./EditFlagDialog";
 import { FlagHistory } from "./FlagHistory";
 import { FlagSwitch } from "./FlagSwitch";
@@ -18,6 +19,7 @@ const loadHistory = (flag: Flag): LoadedHistory => ({
 export function FlagRow({ flag, isNew }: Props) {
   const [problem, setProblem] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   // null = history closed. The promise is created in event handlers/effects,
   // never in render, and remembers which flag version it was fetched for.
   const [history, setHistory] = useState<LoadedHistory | null>(null);
@@ -44,6 +46,13 @@ export function FlagRow({ flag, isNew }: Props) {
         </button>
         <button
           type="button"
+          className="button button--small button--danger-text"
+          onClick={() => setDeleting(true)}
+        >
+          Delete
+        </button>
+        <button
+          type="button"
           className="button button--small"
           aria-expanded={historyOpen}
           onClick={() => setHistory(historyOpen ? null : loadHistory(flag))}
@@ -58,6 +67,7 @@ export function FlagRow({ flag, isNew }: Props) {
         </p>
       )}
       {editing && <EditFlagDialog flag={flag} onClose={() => setEditing(false)} />}
+      {deleting && <DeleteFlagDialog flag={flag} onClose={() => setDeleting(false)} />}
       {history && (
         <ErrorBoundary fallback={<p className="flag__problem">Couldn't load history.</p>}>
           <Suspense fallback={<p className="loading">Loading history…</p>}>
